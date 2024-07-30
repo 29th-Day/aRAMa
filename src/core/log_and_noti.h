@@ -6,6 +6,8 @@
 //the log/notification class
 #include <coreinit/internal.h>
 
+#include <whb/log.h>
+
 #define CHECK_ERROR(cond)     \
 	if (cond)                 \
 	{                         \
@@ -13,17 +15,18 @@
 		goto error;       \
 }
 
-class aRAMaLogNoti {
+class aRAMaLogNoti
+{
 private:
     bool notis_enabled; //extra on top of the regular setting in case init fails
 
 public:
 
-    void print(const char *message);
-    void print_w_notif(const char *message, uint8_t seconds);
-    void notification(const char *message, uint8_t seconds);
+    void print(const char* message);
+    void print_w_notif(const char* message, uint8_t seconds);
+    void notification(const char* message, uint8_t seconds);
 
-    void printf();
+    void printf(const char* fmt, ...);
     void printf_w_notif();
     void notificationf();
 
