@@ -35,12 +35,21 @@ public:
     // static const char tcpgecko_id;
 
     //IP address of the Wii U
-    static uint32_t ip_address;
+    uint32_t ip_address;
 
     //Amount of SD codes detected for the currently running title
-    static uint32_t local_code_amount;
+    uint32_t local_code_amount;
 
-    static std::map<const char*, bool> settings;
+    std::map<const char*, bool> settings;
+
+    // bool* aRAMa_active;
+    // bool* sdCodes_active;
+    // bool* notifications_active;
+    // bool* codeHandler_active;
+    // bool* save_new_codes;
+    // bool* caffiine_active;
+    // bool* saviine_active;
+    // bool* tcpGecko_active;
 
     aRAMaConfig();
     ~aRAMaConfig();

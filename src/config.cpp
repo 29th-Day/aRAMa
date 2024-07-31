@@ -31,6 +31,15 @@ aRAMaConfig::aRAMaConfig()
         {"TcpGecko", false}
     };
 
+    // aRAMa_active = &settings["aRAMa"];
+    // sdCodes_active = &settings["SD Codes"];
+    // notifications_active = &settings["Notifications"];
+    // codeHandler_active = &settings["Code Handler"];
+    // save_new_codes = &settings["Save codes to SD"];
+    // caffiine_active = &settings["Caffiine"];
+    // saviine_active = &settings["Saviine"];
+    // tcpGecko_active = &settings["TcpGecko"];
+
     LoadSettings();
     SaveSettings();
 }
