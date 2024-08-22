@@ -25,8 +25,12 @@ function(wups_create_plugin target)
         __WUPS__
     )
 
-    target_link_options(${TARGET} PRIVATE
-        "-Wl,-Map,test.map"
+    target_compile_options(${target} PRIVATE
+        $<$<COMPILE_LANGUAGE:ASM>:-mregnames>
+    )
+
+    target_link_options(${target} PRIVATE
+        "-Wl,-Map,${target}.map"
         "-T${WUPS_ROOT}/share/wups.ld"
         "-specs=${WUPS_ROOT}/share/wups.specs"
     )
