@@ -7,3 +7,6 @@ aRAMa.wps
 compile_commands.json
 __pycache__
 *.backup
+*.npy
+*.py
+*.env

@@ -9,24 +9,24 @@
 
 // local 
 
-// I need help...or sleep...whatever
+// I dont know wtf this magic does
 #define patchAddress reinterpret_cast<void*>(reinterpret_cast<uint32_t>(AVMGetDRCScanMode) + 0x44)
 
 // ---
 
-void PauseConsole(const Socket socket)
+void ConsoleState::Pause(const Socket socket)
 {
-    uint32_t state = ConsoleState::PAUSED;
+    uint32_t state = PAUSED;
     kernel::memcpy(patchAddress, kernel::physical(&state), sizeof(state));
 }
 
-void ResumeConsole(const Socket socket)
+void ConsoleState::Resume(const Socket socket)
 {
-    uint32_t state = ConsoleState::RUNNING;
+    uint32_t state = RUNNING;
     kernel::memcpy(patchAddress, kernel::physical(&state), sizeof(state));
 }
 
-void GetConsoleState(const Socket socket)
+void ConsoleState::GetState(const Socket socket)
 {
     uint32_t state = 0;
 

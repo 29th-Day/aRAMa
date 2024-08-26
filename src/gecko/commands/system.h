@@ -3,6 +3,11 @@
 #include "commands.h"
 #include "../../tcp/server.h"
 
-void GetSymbol(const Socket socket);
+namespace System
+{
+    void GetSymbol(const Socket socket);
 
-void ExecuteProcedure(const Socket socket);
+    void ExecuteProcedure(const Socket socket);
+
+    void ValidateAddressRange(const Socket socket);
+};

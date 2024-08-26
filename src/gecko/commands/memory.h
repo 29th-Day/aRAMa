@@ -3,14 +3,21 @@
 #include "commands.h"
 #include "../../tcp/server.h"
 
-void Write8(const Socket socket);
 
-void ReadMemory(const Socket socket);
+namespace Memory
+{
+    void Read(const Socket socket);
 
-void ReadMemoryKernel(const Socket socket);
+    template <typename T>
+    void Write(const Socket socket);
 
-void ValidateAddressRange(const Socket socket);
+    void ReadKernel(const Socket socket);
 
-void Search32(const Socket socket);
+    void WriteKernel(const Socket socket);
 
-void AdvancedSearch(const Socket socket);
+    void Search32(const Socket socket);
+
+    void SearchEx(const Socket socket);
+
+    // void Disassemble(const Socket socket);
+};

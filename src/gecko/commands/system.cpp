@@ -16,14 +16,13 @@ struct SymbolOffset
 
 typedef int64_t GenericFunction(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t);
 
-void GetSymbol(const Socket socket)
+void System::GetSymbol(const Socket socket)
 {
     uint8_t size = 0;
     uint8_t type = 0;
     SymbolOffset offset;
 
     CHECK_ERROR(readwait(socket, size));
-
     CHECK_ERROR(readwait(socket, offset));
     size -= sizeof(SymbolOffset);
     // account for reduced offset
@@ -50,7 +49,7 @@ void GetSymbol(const Socket socket)
     send(socket, &address, sizeof(address), 0);
 }
 
-void ExecuteProcedure(const Socket socket)
+void System::ExecuteProcedure(const Socket socket)
 {
     GenericFunction* function;
     uint32_t args[8];
@@ -65,4 +64,16 @@ void ExecuteProcedure(const Socket socket)
     Logger::printf("0x%016llx = %p(0x%08x, 0x%08x, 0x%08x, 0x%08x, 0x%08x, 0x%08x, 0x%08x, 0x%08x)", result, function, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
 
     send(socket, &result, sizeof(result), 0);
+}
+
+void System::ValidateAddressRange(const Socket socket)
+{
+    uint32_t start = 0, end = 0;
+
+    CHECK_ERROR(readwait(socket, start));
+    CHECK_ERROR(readwait(socket, end));
+
+    bool valid = __OSValidateAddressSpaceRange(1, start, end - start + 1);
+
+    send(socket, &valid, sizeof(valid), 0);
 }

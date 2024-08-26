@@ -47,41 +47,41 @@ void extractMemory(const Socket socket, uint32_t start, uint32_t end, bool useKe
     }
 }
 
-bool validateRange(uint32_t start, uint32_t end)
-{
-    return __OSValidateAddressSpaceRange(1, start, end - start + 1);
-}
-
 // ---
 
-void Write8(const Socket socket)
-{
-    uint32_t address = 0;
-    int32_t value = 0;
-    CHECK_ERROR(readwait(socket, address));
-    CHECK_ERROR(readwait(socket, value));
-
-    Logger::printf("Write8: %p  <- %i (0x%x)", address, value, OSEffectiveToPhysical(address));
-
-    // KernelCopyData(OSEffectiveToPhysical((uint32_t)ptr), (uint32_t)ptr, 1);
-    // DCFlushRange(ptr, 1);
-}
-
-void ReadMemory(const Socket socket)
+void Memory::Read(const Socket socket)
 {
     uint32_t start = 0, end = 0;
-    uint8_t buffer[DATA_BUFFER_SIZE] = { 0 };
 
     CHECK_ERROR(readwait(socket, start));
     CHECK_ERROR(readwait(socket, end));
 
-    Logger::printf("%p - %p (%i) [%p - %p]",
-        start, end, end - start);
+    Logger::printf("%s | %p - %p (%i)",
+        __FUNCTION__, start, end, end - start);
 
     extractMemory(socket, start, end, false);
 }
 
-void ReadMemoryKernel(const Socket socket)
+template <typename T>
+void Memory::Write(const Socket socket)
+{
+    uint8_t* ptr = nullptr;
+    uint32_t value = 0;
+
+    CHECK_ERROR(readwait(socket, ptr));
+    CHECK_ERROR(readwait(socket, value));
+
+    Logger::printf("Write%u: 0x%08x  <- 0x%02x", sizeof(T) * 2, ptr, value);
+
+    *ptr = static_cast<T>(value);
+    DCFlushRange(ptr, 1);
+}
+
+template void Memory::Write<uint8_t>(const Socket socket);
+template void Memory::Write<uint16_t>(const Socket socket);
+template void Memory::Write<uint32_t>(const Socket socket);
+
+void Memory::ReadKernel(const Socket socket)
 {
     uint32_t start = 0, end = 0, useKernel = 0;
 
@@ -89,25 +89,24 @@ void ReadMemoryKernel(const Socket socket)
     CHECK_ERROR(readwait(socket, end));
     CHECK_ERROR(readwait(socket, useKernel));
 
-    Logger::printf("%p - %p (%i)",
-        start, end, end - start);
+    Logger::printf("%s | %p - %p (%i) [kernel: %s]",
+        __FUNCTION__, start, end, end - start, btos(useKernel));
 
-    extractMemory(socket, start, end, static_cast<bool>(useKernel));
+    extractMemory(socket, start, end, useKernel);
 }
 
-void ValidateAddressRange(const Socket socket)
+void Memory::WriteKernel(const Socket socket)
 {
-    uint32_t start = 0, end = 0;
+    uint32_t* address;
+    uint32_t value;
 
-    CHECK_ERROR(readwait(socket, start));
-    CHECK_ERROR(readwait(socket, end));
+    CHECK_ERROR(readwait(socket, address));
+    CHECK_ERROR(readwait(socket, value));
 
-    bool valid = validateRange(start, end);
-
-    send(socket, &valid, sizeof(valid), 0);
+    kernel::memcpy(address, kernel::physical(&value), sizeof(value));
 }
 
-void Search32(const Socket socket)
+void Memory::Search32(const Socket socket)
 {
     uint32_t startAddress = 0, length = 0, found = 0;
     int32_t value;
@@ -116,22 +115,22 @@ void Search32(const Socket socket)
     CHECK_ERROR(readwait(socket, value));
     CHECK_ERROR(readwait(socket, length));
 
-    if (validateRange(startAddress, startAddress+length))
-    {
-        Logger::print("valid address");
-        // normal copy / pointer
-    }
+    // if (validateRange(startAddress, startAddress+length))
+    // {
+    //     Logger::print("valid address");
+    //     // normal copy / pointer
+    // }
 
-    if (OSIsAddressValid(startAddress) && OSIsAddressValid(startAddress + length))
-    {
-        Logger::print("valid address");
-        // normal copy / pointer
-    }
-    else
-    {
-        Logger::print("invalid address (likely out of bound for memory area?)");
-        // need kernel copy
-    }
+    // if (OSIsAddressValid(startAddress) && OSIsAddressValid(startAddress + length))
+    // {
+    //     Logger::print("valid address");
+    //     // normal copy / pointer
+    // }
+    // else
+    // {
+    //     Logger::print("invalid address (likely out of bound for memory area?)");
+    //     // need kernel copy
+    // }
 
     for (uint32_t index = startAddress; index < startAddress + length; index += sizeof(index))
     {
@@ -146,7 +145,7 @@ void Search32(const Socket socket)
     send(socket, &found, sizeof(found), 0);
 }
 
-void AdvancedSearch(const Socket socket)
+void Memory::SearchEx(const Socket socket)
 {
     uint32_t startAddress, length, useKernel, maxResults, aligned, patternLength;
 
@@ -200,8 +199,19 @@ void AdvancedSearch(const Socket socket)
     for (const uint32_t& a : found)
         Logger::printf("found: 0x%08x", a);
 
-    uint32_t bytes = static_cast<uint32_t>(found.size()) * 4;
-    send(socket, &bytes, sizeof(bytes), 0);
-    send(socket, reinterpret_cast<uint8_t*>(found.data()),
-        bytes, 0);
+    // uint32_t bytes = static_cast<uint32_t>(found.size()) * 4;
+    // send(socket, &bytes, sizeof(bytes), 0);
+    found.insert(found.begin(), found.size() * sizeof(uint32_t));
+    send(socket, found.data(), found.size() * sizeof(uint32_t), 0);
 }
+
+// void Memory::Disassemble(const Socket socket)
+// {
+//     uint32_t start, end, idk;
+
+//     CHECK_ERROR(readwait(socket, start));
+//     CHECK_ERROR(readwait(socket, end));
+//     CHECK_ERROR(readwait(socket, idk));
+
+//     Logger::printf("%s | NOT YET IMPLEMENTED", __FUNCTION__);
+// }
