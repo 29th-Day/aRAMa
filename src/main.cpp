@@ -60,7 +60,7 @@ ON_APPLICATION_START()
 		Logger::print("Install code handler");
 		// CodeHandler::Install();
 
-		Notifications::show("Gecko starting");
+		Notifications::show("Gecko starting...");
 		TCP::start(runGecko);
 	}
 }

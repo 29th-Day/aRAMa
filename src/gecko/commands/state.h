@@ -11,9 +11,7 @@ namespace ConsoleState
         RUNNING = 0x3800'0000
     };
 
-    void Pause(const Socket socket);
+    void Set(uint32_t state);
 
-    void Resume(const Socket socket);
-
-    void GetState(const Socket socket);
+    void Get(const Socket* socket);
 };

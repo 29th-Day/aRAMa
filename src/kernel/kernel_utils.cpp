@@ -4,6 +4,8 @@
 #include <coreinit/memorymap.h>
 #include <coreinit/cache.h>
 
+#include <algorithm>
+
 #define addrof(x) reinterpret_cast<uint32_t>(x)
 
 void* kernel::memcpy(void* dst, const void* src, const uint32_t count)
@@ -44,4 +46,17 @@ void* kernel::physical(const void* pointer)
 uint32_t kernel::physical(const uint32_t address)
 {
     return OSEffectiveToPhysical(address);
+}
+
+void kernel::execute(uint8_t* assembly, uint32_t size)
+{
+    // write assembly to executable region
+    void* address = reinterpret_cast<void*>(0x1000'0000 - size);
+    memcpy(address, assembly, size);
+
+    // cast to function and execute
+    reinterpret_cast<void(*)()>(address)();
+
+    std::fill_n(assembly, size, 0);
+    memcpy(address, assembly, size);
 }

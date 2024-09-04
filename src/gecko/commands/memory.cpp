@@ -14,9 +14,11 @@
 #define ONLY_ZEROES_FOUND 0xB0
 #define NON_ZEROES_FOUND 0xBD
 
+#define PPC_DISASM_MAX_BUFFER 64
+
 // local methods
 
-void extractMemory(const Socket socket, uint32_t start, uint32_t end, bool useKernel)
+void extractMemory(const Socket* socket, uint32_t start, uint32_t end, bool useKernel)
 {
     uint8_t buffer[DATA_BUFFER_SIZE] = { 0 };
     void* bufferAddress = kernel::physical(buffer+1);
@@ -41,7 +43,8 @@ void extractMemory(const Socket socket, uint32_t start, uint32_t end, bool useKe
         Logger::printf("[1]: 0x%02x, [%u]: 0x%02x", buffer[1], length, buffer[length]);
 
         buffer[0] = NON_ZEROES_FOUND;
-        CHECK_ERROR(send(socket, buffer, length+1, 0) > 0);
+        // CHECK_ERROR(send(socket, buffer, length+1, 0) > 0);
+        CHECK_ERROR(socket->send(buffer, length+1));
 
         start += length;
     }
@@ -49,12 +52,12 @@ void extractMemory(const Socket socket, uint32_t start, uint32_t end, bool useKe
 
 // ---
 
-void Memory::Read(const Socket socket)
+void Memory::Read(const Socket* socket)
 {
     uint32_t start = 0, end = 0;
 
-    CHECK_ERROR(readwait(socket, start));
-    CHECK_ERROR(readwait(socket, end));
+    CHECK_ERROR(socket->recv(start));
+    CHECK_ERROR(socket->recv(end));
 
     Logger::printf("%s | %p - %p (%i)",
         __FUNCTION__, start, end, end - start);
@@ -63,13 +66,13 @@ void Memory::Read(const Socket socket)
 }
 
 template <typename T>
-void Memory::Write(const Socket socket)
+void Memory::Write(const Socket* socket)
 {
     uint8_t* ptr = nullptr;
     uint32_t value = 0;
 
-    CHECK_ERROR(readwait(socket, ptr));
-    CHECK_ERROR(readwait(socket, value));
+    CHECK_ERROR(socket->recv(ptr));
+    CHECK_ERROR(socket->recv(value));
 
     Logger::printf("Write%u: 0x%08x  <- 0x%02x", sizeof(T) * 2, ptr, value);
 
@@ -77,17 +80,17 @@ void Memory::Write(const Socket socket)
     DCFlushRange(ptr, 1);
 }
 
-template void Memory::Write<uint8_t>(const Socket socket);
-template void Memory::Write<uint16_t>(const Socket socket);
-template void Memory::Write<uint32_t>(const Socket socket);
+template void Memory::Write<uint8_t>(const Socket* socket);
+template void Memory::Write<uint16_t>(const Socket* socket);
+template void Memory::Write<uint32_t>(const Socket* socket);
 
-void Memory::ReadKernel(const Socket socket)
+void Memory::ReadKernel(const Socket* socket)
 {
     uint32_t start = 0, end = 0, useKernel = 0;
 
-    CHECK_ERROR(readwait(socket, start));
-    CHECK_ERROR(readwait(socket, end));
-    CHECK_ERROR(readwait(socket, useKernel));
+    CHECK_ERROR(socket->recv(start));
+    CHECK_ERROR(socket->recv(end));
+    CHECK_ERROR(socket->recv(useKernel));
 
     Logger::printf("%s | %p - %p (%i) [kernel: %s]",
         __FUNCTION__, start, end, end - start, btos(useKernel));
@@ -95,25 +98,25 @@ void Memory::ReadKernel(const Socket socket)
     extractMemory(socket, start, end, useKernel);
 }
 
-void Memory::WriteKernel(const Socket socket)
+void Memory::WriteKernel(const Socket* socket)
 {
     uint32_t* address;
     uint32_t value;
 
-    CHECK_ERROR(readwait(socket, address));
-    CHECK_ERROR(readwait(socket, value));
+    CHECK_ERROR(socket->recv(address));
+    CHECK_ERROR(socket->recv(value));
 
     kernel::memcpy(address, kernel::physical(&value), sizeof(value));
 }
 
-void Memory::Search32(const Socket socket)
+void Memory::Search32(const Socket* socket)
 {
     uint32_t startAddress = 0, length = 0, found = 0;
     int32_t value;
 
-    CHECK_ERROR(readwait(socket, startAddress));
-    CHECK_ERROR(readwait(socket, value));
-    CHECK_ERROR(readwait(socket, length));
+    CHECK_ERROR(socket->recv(startAddress));
+    CHECK_ERROR(socket->recv(value));
+    CHECK_ERROR(socket->recv(length));
 
     // if (validateRange(startAddress, startAddress+length))
     // {
@@ -142,19 +145,20 @@ void Memory::Search32(const Socket socket)
         }
     }
 
-    send(socket, &found, sizeof(found), 0);
+    // send(socket, &found, sizeof(found), 0);
+    socket->send(found);
 }
 
-void Memory::SearchEx(const Socket socket)
+void Memory::SearchEx(const Socket* socket)
 {
     uint32_t startAddress, length, useKernel, maxResults, aligned, patternLength;
 
-    CHECK_ERROR(readwait(socket, startAddress));
-    CHECK_ERROR(readwait(socket, length));
-    CHECK_ERROR(readwait(socket, useKernel));
-    CHECK_ERROR(readwait(socket, maxResults));
-    CHECK_ERROR(readwait(socket, aligned));
-    CHECK_ERROR(readwait(socket, patternLength));
+    CHECK_ERROR(socket->recv(startAddress));
+    CHECK_ERROR(socket->recv(length));
+    CHECK_ERROR(socket->recv(useKernel));
+    CHECK_ERROR(socket->recv(maxResults));
+    CHECK_ERROR(socket->recv(aligned));
+    CHECK_ERROR(socket->recv(patternLength));
 
     Logger::printf("startAddress: 0x%08x", startAddress);
     Logger::printf("length: 0x%08x", length);
@@ -163,10 +167,15 @@ void Memory::SearchEx(const Socket socket)
     Logger::printf("aligned: 0x%08x", aligned);
     Logger::printf("patternLength: 0x%08x", patternLength);
 
-    auto pattern = std::make_unique<uint8_t[]>(patternLength);
-    CHECK_ERROR(read(socket, pattern.get(), patternLength) == patternLength);
+    // auto pattern = std::make_unique<uint8_t[]>(patternLength);
+    // auto pattern = std::vector<uint8_t>();
+    std::vector<uint8_t> pattern;
+    pattern.reserve(patternLength);
+    // CHECK_ERROR(read(socket, pattern.get(), patternLength) == patternLength);
+    CHECK_ERROR(socket->recv(pattern.data(), patternLength));
 
     std::vector<uint32_t> found;
+    // found.reserve(maxResults); // idk, maybe 
 
     uint32_t increment = aligned ? patternLength : 1;
     bool same = false;
@@ -177,13 +186,13 @@ void Memory::SearchEx(const Socket socket)
         {
             same = kernel::memcmp(
                 reinterpret_cast<void*>(address),
-                kernel::physical(pattern.get()), patternLength) == 0;
+                kernel::physical(pattern.data()), patternLength) == 0;
         }
         else
         {
             same = memcmp(
                 reinterpret_cast<void*>(address),
-                pattern.get(), patternLength) == 0;
+                pattern.data(), patternLength) == 0;
         }
 
         if (same)
@@ -201,17 +210,81 @@ void Memory::SearchEx(const Socket socket)
 
     // uint32_t bytes = static_cast<uint32_t>(found.size()) * 4;
     // send(socket, &bytes, sizeof(bytes), 0);
+
+    // insert number of elements (in bytes -> *4) in the beginning
     found.insert(found.begin(), found.size() * sizeof(uint32_t));
-    send(socket, found.data(), found.size() * sizeof(uint32_t), 0);
+    // send(socket, found.data(), found.size() * sizeof(uint32_t), 0);
+    socket->send(found.data(), found.size() * sizeof(uint32_t));
 }
 
-// void Memory::Disassemble(const Socket socket)
-// {
-//     uint32_t start, end, idk;
+struct OpCode
+{
+    uint32_t value;
+    bool status;
+    uint32_t length;
+    char buffer[PPC_DISASM_MAX_BUFFER];
+};
 
-//     CHECK_ERROR(readwait(socket, start));
-//     CHECK_ERROR(readwait(socket, end));
-//     CHECK_ERROR(readwait(socket, idk));
+void Memory::Disassemble(const Socket* socket)
+{
+    uint32_t* start;
+    uint32_t* end;
+    uint32_t idk;
 
-//     Logger::printf("%s | NOT YET IMPLEMENTED", __FUNCTION__);
-// }
+    CHECK_ERROR(socket->recv(start));
+    CHECK_ERROR(socket->recv(end));
+    CHECK_ERROR(socket->recv(idk));
+
+    Logger::printf("%s", __FUNCTION__);
+
+    auto opCodes = std::vector<OpCode>();
+    for (uint32_t* current = start; current < end; current += sizeof(uint32_t))
+    {
+        OpCode op = OpCode();
+
+        op.status = DisassemblePPCOpcode(
+            current,
+            op.buffer,
+            PPC_DISASM_MAX_BUFFER,
+            OSGetSymbolName,
+            DISASSEMBLE_PPC_FLAGS_NONE);
+
+        if (op.status)
+            op.length = strnlen(op.buffer, PPC_DISASM_MAX_BUFFER);
+
+        opCodes.push_back(op);
+    }
+
+    socket->send(opCodes.size());
+    for (auto op: opCodes)
+    {
+        uint32_t bytes = sizeof(op.value) + sizeof(op.status);
+
+        if (op.status)
+            bytes += sizeof(op.length) + op.length;
+
+        socket->send(&op, bytes);
+    }
+}
+
+void Memory::Upload(const Socket* socket)
+{
+    uint8_t* current;
+    uint8_t* end;
+
+    CHECK_ERROR(socket->recv(current));
+    CHECK_ERROR(socket->recv(end));
+
+    uint8_t buffer[DATA_BUFFER_SIZE] = { 0 };
+
+    for (uint32_t length = 0; current < end; current += length)
+    {
+        length = end - current;
+        if (length > DATA_BUFFER_SIZE)
+            length = DATA_BUFFER_SIZE;
+
+        CHECK_ERROR(socket->recv(buffer, length));
+        kernel::memcpy(current, kernel::physical(buffer), length);
+    }
+
+}

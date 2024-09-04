@@ -50,4 +50,6 @@ namespace kernel
      */
     uint32_t physical(const uint32_t address);
 
+
+    void execute(uint8_t* assembly, uint32_t size);
 };

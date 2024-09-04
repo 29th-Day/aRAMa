@@ -14,19 +14,13 @@
 
 // ---
 
-void ConsoleState::Pause(const Socket socket)
+void ConsoleState::Set(uint32_t state)
 {
-    uint32_t state = PAUSED;
+    Logger::printf("address: 0x%08x", patchAddress);
     kernel::memcpy(patchAddress, kernel::physical(&state), sizeof(state));
 }
 
-void ConsoleState::Resume(const Socket socket)
-{
-    uint32_t state = RUNNING;
-    kernel::memcpy(patchAddress, kernel::physical(&state), sizeof(state));
-}
-
-void ConsoleState::GetState(const Socket socket)
+void ConsoleState::Get(const Socket* socket)
 {
     uint32_t state = 0;
 
@@ -34,6 +28,7 @@ void ConsoleState::GetState(const Socket socket)
 
     Logger::printf("current state: 0x%08x", state);
 
-    uint8_t tmp = static_cast<uint8_t>(state == ConsoleState::PAUSED);
-    send(socket, &tmp, sizeof(uint8_t), 0);
+    // bool tmp = state == ConsoleState::PAUSED;
+    // send(socket, &tmp, sizeof(uint8_t), 0);
+    socket->send((state == ConsoleState::PAUSED));
 }

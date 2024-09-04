@@ -9,8 +9,8 @@
 
 #define close_fd(fd) {if (fd > 0) { close(fd); fd = -1; }}
 
-static Socket server = -1;
-static Socket client = -1;
+static int server = -1;
+static int client = -1;
 
 static std::unique_ptr<std::thread> tcpThread = nullptr;
 
@@ -36,7 +36,7 @@ void run_server(ClientReadyCallback callback)
 
         Logger::print("---  new client  ---");
 
-        callback(client);
+        callback(Socket(client));
 
         Logger::print("---  del client  ---");
 
@@ -70,12 +70,14 @@ void TCP::stop()
         return;
     }
 
+    Logger::printf("stopping tcp server");
+
     if (client > 0)
-        // Logger::printf("client shutdown: %i", shutdown(client, SHUT_RDWR));
-        close_fd(client);
+        Logger::printf("client shutdown: %i", shutdown(client, SHUT_RDWR));
+    // close_fd(client);
     if (server > 0)
-        // Logger::printf("server shutdown: %i", shutdown(server, SHUT_RDWR));
-        close_fd(server);
+        Logger::printf("server shutdown: %i", shutdown(server, SHUT_RDWR));
+    // close_fd(server);
 
     tcpThread->join();
     tcpThread = nullptr;
