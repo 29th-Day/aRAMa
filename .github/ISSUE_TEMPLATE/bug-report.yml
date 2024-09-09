@@ -1,0 +1,95 @@
+name: Bug Report
+description: File a bug report.
+title: "[BUG] "
+labels: ["bug"]
+# projects: []
+# assignees: []
+body:
+  - type: markdown
+    attributes:
+    value: |
+    Please fill out the sections below to help use reproduce and fix the bug you are encountering.
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe your issue
+      placeholder: I did X and Y happend
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Please provide **minimal** steps to reproduce the bug.
+      placeholder: |
+        1. Step A
+        2. Step B
+        3. Step C
+      validations:
+        required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What was the expected result?
+      placeholder: I expected Z to happen
+      validations:
+        required: true
+  - type: textarea
+    id: additional
+    attributes:
+      label: Put here any logs, screenshots or vidoes (optional)
+      Tip: You can use drag'n'drop
+    validations:
+      required: false
+  - type: markdown
+    attributes:
+      value: "### Environment"
+  - type: dropdown
+    id: OS
+    attributes:
+      label: Select your used OS
+      multiple: true
+      options:
+        - Windows 11
+        - Windows 10
+        - MacOS
+        - Linux / Unix-like
+        - other
+    validations:
+      required: true
+  - type: input
+    id: OS-additional
+    attributes:
+      placeholder: Additional OS information (optional)
+    validations:
+      required: false
+  - type: dropdown
+    id: CafeOS
+    attributes:
+      label: Select your Wii U version
+      options:
+        - 5.5.6 (U)
+        - 5.5.5
+        - 5.5.4 (E)
+        - 5.5.x
+        - 5.4.x
+        - 5.3.x
+        - 5.2.x
+        - 5.1.x
+        - 5.0.x
+        - 4.x.x
+        - 3.x.x
+        - 2.x.x
+        - 1.x.x
+    validations:
+      required: true
+  - type: checkboxes
+    id: terms
+    attributes:
+      options:
+        - label: I have used the search function to check if a similar bug is already reported
+          required: true
+        - label: I believe the bug is within aRAMa itself and not a third-party program
+          required: true
+        - label: I want to work on this issue
+          required: false
