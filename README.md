@@ -68,12 +68,12 @@ docker build -t wups/arama -o build .
 ## Local
 
 To compile aRAMa you'll need:
-* `cmake`
-* [`devkitPro`](https://devkitpro.org/wiki/Getting_Started)
-* [`wut`](https://github.com/devkitPro/wut)
-* [`WiiUPluginSystem`](https://github.com/wiiu-env/WiiUPluginSystem)
-* [`libkernel`](https://github.com/wiiu-env/libkernel)
-* [`libnotifications`](https://github.com/wiiu-env/libnotifications)
+* cmake
+* [devkitPro](https://devkitpro.org/wiki/Getting_Started)
+* [wut](https://github.com/devkitPro/wut)
+* [WiiUPluginSystem](https://github.com/wiiu-env/WiiUPluginSystem)
+* [libkernel](https://github.com/wiiu-env/libkernel)
+* [libnotifications](https://github.com/wiiu-env/libnotifications)
 
 After you installed the dependencies (recommended in order) run
 
@@ -146,7 +146,7 @@ Commands:
 
 # Credits
 
-* **c08oprkiua** for starting developemnt on aRAMa
+* **c08oprkiua** for starting development on aRAMa
 * **29th-Day** for contributing to aRAMa
 * **Maschell** for help on Discord
 * **lulsec2** (Discord) for coming up with the name "aRAMa"

@@ -1,0 +1,49 @@
+name: New feature
+description: Suggest or request a new feature
+title: "Feature: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please fill out the sections below to properly describe the new feature you are suggesting. The project is maintained by volunteers, so stay friendly and be patient. Features with higher demand are more likely to be prioritized. If you want to have something implemented *now*...feel free to do it yourself 😁
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the feature
+      placeholder: Ability to do X
+    validations:
+      required: true
+  - type: textarea
+    id: rationale
+    attributes:
+      label: Reason for implemtation
+      description: A good reason might bring priority to a certain feature.
+      placeholder: It will allow to do Y that is needed for Z
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      placeholder: |
+        Add any other context or screenshots about the feature request here.
+  - type: dropdown
+    id: user
+    attributes:
+      label: I think this would be benefitial to ...
+      multiple: true
+      options:
+        - "users"
+        - "first-party developers"
+        - "third-party developers"
+        - "maintainers"
+  - type: checkboxes
+    id: assign
+    attributes:
+      label: DIY
+      description: "If you want to work on it yourself, please wait for a response from the maintainers to ensure that 1) duplicate work is avoided, and 2) your proposed feature aligns with the project's direction."
+      options:
+        - label: I want to work on this issue
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for your suggestion! Let's see together if it can be implemented.
