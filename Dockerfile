@@ -56,7 +56,7 @@ RUN cmake -S . -B build &&\
 FROM scratch
 COPY --from=build /wiiu/aRAMa/build/aRAMa.wps .
 
-CMD ["sleep", "infinity"]
+# CMD ["sleep", "infinity"] # keep the contrainer running (debug only)
 
 
 # docker build -t wups/aRAMa --output=<dir> <Dockerfile>
