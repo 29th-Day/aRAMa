@@ -5,7 +5,7 @@ labels: ["bug"]
 body:
   - type: markdown
     attributes:
-      value: Please fill out the sections below to help use reproduce and fix the bug you are encountering. The project is maintained by volunteers, so stay friendly and be patient.
+      value: Please fill out the sections below to help use reproduce and fix the bug you are encountering.
   - type: textarea
     id: description
     attributes:
@@ -42,7 +42,7 @@ body:
     id: OS
     attributes:
       label: Select your used OS
-      multiple: true
+      default: 1
       options:
         - Windows 11
         - Windows 10
@@ -60,6 +60,7 @@ body:
     id: CafeOS
     attributes:
       label: Select your Wii U version
+      description: Your version can be found in the Settings app.
       default: 1
       options:
         - 5.5.6 (U)
@@ -77,10 +78,16 @@ body:
         - 1.x.x
     validations:
       required: true
+  - type: input
+    id: aRAMa-version
+    attributes:
+      label: aRAMa Version
+      description: Your version can be found in the Config Menu (L + Minus + DPAD-Down).
+      placeholder: x.x.x
   - type: checkboxes
     id: terms
     attributes:
-      label: Agreements
+      label: Checks
       options:
         - label: I have used the search function to check if a similar bug is already reported
           required: true

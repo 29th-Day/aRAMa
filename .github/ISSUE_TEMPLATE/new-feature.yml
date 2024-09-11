@@ -40,7 +40,7 @@ body:
     id: assign
     attributes:
       label: DIY
-      description: "If you want to work on it yourself, please wait for a response from the maintainers to ensure that 1) duplicate work is avoided, and 2) your proposed feature aligns with the project's direction."
+      description: If you want to work on it yourself, please wait for a response from the maintainers to ensure that 1) duplicate work is avoided, and 2) your proposed feature aligns with the project's direction.
       options:
         - label: I want to work on this issue
   - type: markdown
