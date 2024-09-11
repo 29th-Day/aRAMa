@@ -78,12 +78,6 @@ body:
         - 1.x.x
     validations:
       required: true
-  - type: input
-    id: aRAMa-version
-    attributes:
-      label: aRAMa Version
-      description: Your version can be found in the Config Menu (L + Minus + DPAD-Down).
-      placeholder: x.x.x
   - type: checkboxes
     id: terms
     attributes:

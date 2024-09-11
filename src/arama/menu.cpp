@@ -57,9 +57,6 @@ WUPSConfigAPICallbackStatus PluginMenu::Open(WUPSConfigCategoryHandle root)
     error = WUPSConfigItemStub_AddToCategory(root,
         std::format("TCP PORT: {}", TCP::PORT).c_str());
 
-    error = WUPSConfigItemStub_AddToCategory(root,
-        std::format("Version: {}.{}.{}", Version::major(), Version::minor(), Version::patch()).c_str());
-
     return (error == WUPSCONFIG_API_RESULT_SUCCESS) ?
         WUPSCONFIG_API_CALLBACK_RESULT_SUCCESS :
         WUPSCONFIG_API_CALLBACK_RESULT_ERROR;
