@@ -5,13 +5,13 @@
 
 namespace ConsoleState
 {
-    enum : uint32_t
+    enum State : uint32_t
     {
         PAUSED = 0x3800'0001,
         RUNNING = 0x3800'0000
     };
 
-    void Set(uint32_t state);
+    void Set(State state);
 
     void Get(const Socket* socket);
 };
