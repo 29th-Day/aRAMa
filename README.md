@@ -8,11 +8,6 @@ This is an TCPGecko rewrite and port for Aroma. It contains several improvements
 
 Not all TCPGecko software is fully compatible with aRAMa out-of-the-box, e.g. some memory addresses may differ due to how Aroma plugins work. **Do not report unmodified software or codes as bugs** unless you're certain the issue is caused by aRAMa itself. For help or to report problems with specific software, feel free to join our [Discord Servers](#discord) or contact the respective software maintainers.
 
-# Todo
-* Issue template
-* PR template
-* (short) Code of Conduct
-
 # Usage
 
 The aRAMa config menu can be accessed via the Plugin Menu by pressing `L + Minus + D-Down`.
