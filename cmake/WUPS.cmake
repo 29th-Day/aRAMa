@@ -43,7 +43,5 @@ function(wups_create_plugin target)
         COMMAND ${WUT_ELF2RPL_EXE} ${path}.strip.elf ${path}.wps
         COMMAND ${CMAKE_COMMAND} -E echo 'PL' | dd of=${path}.wps bs=1 seek=9 count=2 conv=notrunc status=none
         COMMAND ${CMAKE_COMMAND} -E rm ${path}.strip.elf
-        # COMMAND ${CMAKE_COMMAND} -E echo 'build ... ${path}.wps'
-        # COMMENT "Creating ${target}.wps"
     )
 endfunction()

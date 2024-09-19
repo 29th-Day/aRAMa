@@ -32,8 +32,6 @@ WUPS_PLUGIN_LICENSE("GPLv3");
 WUPS_USE_WUT_DEVOPTAB();
 WUPS_USE_STORAGE(ARAMA_PLUGIN_NAME);
 
-#include <coreinit/memory.h>
-
 INITIALIZE_PLUGIN()
 {
 	Logger::init(Logger::UDP);
@@ -57,7 +55,7 @@ ON_APPLICATION_START()
 
 	if (Config::options[Config::aRAMa] && isRunningAllowedTitleID())
 	{
-		Logger::print("Install code handler");
+		// Logger::print("Install code handler");
 		// CodeHandler::Install();
 
 		Notifications::show("Gecko starting...");

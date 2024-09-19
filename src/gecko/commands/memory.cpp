@@ -74,10 +74,10 @@ void Memory::Write(const Socket* socket)
     CHECK_ERROR(socket->recv(ptr));
     CHECK_ERROR(socket->recv(value));
 
-    Logger::printf("Write%u: 0x%08x  <- 0x%02x", sizeof(T) * 2, ptr, value);
+    Logger::printf("Write%u: 0x%08x  <- 0x%02x", sizeof(T) * 8, ptr, value);
 
     *ptr = static_cast<T>(value);
-    DCFlushRange(ptr, 1);
+    DCFlushRange(ptr, sizeof(T));
 }
 
 template void Memory::Write<uint8_t>(const Socket* socket);
@@ -106,6 +106,8 @@ void Memory::WriteKernel(const Socket* socket)
     CHECK_ERROR(socket->recv(address));
     CHECK_ERROR(socket->recv(value));
 
+    Logger::printf("%s | address: 0x%08x <- 0x%08x", __FUNCTION__, address, value);
+
     kernel::memcpy(address, kernel::physical(&value), sizeof(value));
 }
 
@@ -117,23 +119,6 @@ void Memory::Search32(const Socket* socket)
     CHECK_ERROR(socket->recv(startAddress));
     CHECK_ERROR(socket->recv(value));
     CHECK_ERROR(socket->recv(length));
-
-    // if (validateRange(startAddress, startAddress+length))
-    // {
-    //     Logger::print("valid address");
-    //     // normal copy / pointer
-    // }
-
-    // if (OSIsAddressValid(startAddress) && OSIsAddressValid(startAddress + length))
-    // {
-    //     Logger::print("valid address");
-    //     // normal copy / pointer
-    // }
-    // else
-    // {
-    //     Logger::print("invalid address (likely out of bound for memory area?)");
-    //     // need kernel copy
-    // }
 
     for (uint32_t index = startAddress; index < startAddress + length; index += sizeof(index))
     {

@@ -14,6 +14,4 @@ namespace System
     void FollowPointer(const Socket* socket);
 
     void ExecuteAssembly(const Socket* socket);
-
-    void GetThreads(const Socket* socket);
 };

@@ -4,9 +4,12 @@
 #include "commands/system.h"
 #include "commands/state.h"
 #include "commands/fs.h"
+#include "commands/os.h"
 
 #include "version.h"
 #include "codeHandler.h"
+
+#include <avm/drc.h>
 
 #include "../arama/logger.h"
 
@@ -24,7 +27,7 @@ void runGecko(const Socket socket)
     Command cmd = Command::UNKNOWN;
     while (socket.recv(cmd))
     {
-        Logger::printf("Command: 0x%02x", cmd);
+        Logger::printf("\nCommand: 0x%02x", cmd);
 
         switch (cmd)
         {
@@ -47,8 +50,8 @@ void runGecko(const Socket socket)
             System::ValidateAddressRange(&socket);
             break;
         case Command::MEMORY_DISASSEMBLE:
-            // skip(socket, sizeof(uint32_t)*3);
-            // Logger::printf("MEMORY_DISASSEMBLE: not implemted");
+            // doesnt work i think
+            // at least different than tcpGecko
             Memory::Disassemble(&socket);
             break;
         case READ_MEMORY_COMPRESSED:
@@ -62,45 +65,37 @@ void runGecko(const Socket socket)
             Memory::ReadKernel(&socket);
             break;
         case Command::TAKE_SCREEN_SHOT:
-            Logger::printf("READ_MEMORY_COMPRESSED: not implemted");
+            Logger::printf("TAKE_SCREEN_SHOT: not implemted");
             break;
         case Command::UPLOAD_MEMORY:
-            // Logger::printf("UPLOAD_MEMORY: not implemted");
             Memory::Upload(&socket);
             break;
         case Command::SERVER_STATUS:
-            // Info::Status(socket);
-            socket.send(1);
+            socket.send<uint8_t>(1);
             break;
         case Command::GET_DATA_BUFFER_SIZE:
-            // Info::BufferSize(socket);
             socket.send(DATA_BUFFER_SIZE);
             break;
         case Command::READ_FILE:
-            // skip "string"
-            // Logger::printf("READ_FILE: not implemted");
             FS::ReadFile(&socket);
             break;
         case Command::READ_DIRECTORY:
-            // skip "string"
-            // Logger::printf("READ_DIRECTORY: not implemted");
             FS::ReadDirectory(&socket);
             break;
         case Command::REPLACE_FILE:
-            // skip "string"
-            // Logger::printf("REPLACE_FILE: not implemted");
             FS::WriteFile(&socket);
             break;
         case Command::GET_CODE_HANDLER_ADDRESS:
-            // Info::CodeHandlerAddress(socket);
+            // Logger::printf("handler address: 0x%08x", CodeHandler::);
             socket.send(CODE_HANDLER_INSTALL_ADDRESS);
             break;
         case Command::READ_THREADS:
             // Logger::printf("READ_THREADS: not implemted");
-            System::GetThreads(&socket);
+            OS::GetThreads(&socket);
             break;
         case Command::ACCOUNT_IDENTIFIER:
-            Logger::printf("ACCOUNT_IDENTIFIER: not implemted");
+            // Logger::printf("ACCOUNT_IDENTIFIER: not implemted");
+            OS::Version(&socket);
             break;
         case Command::FOLLOW_POINTER:
             // I dont quite get this but ...
@@ -119,29 +114,24 @@ void runGecko(const Socket socket)
             Memory::SearchEx(&socket);
             break;
         case Command::EXECUTE_ASSEMBLY:
-            // Logger::printf("EXECUTE_ASSEMBLY: not implemted");
             // not yet tested
             System::ExecuteAssembly(&socket);
             break;
         case Command::PAUSE_CONSOLE:
-            Logger::printf("PAUSE_CONSOLE: idk address");
-            // ConsoleState::Pause(socket);
+            ConsoleState::Set(ConsoleState::PAUSED);
             break;
         case Command::RESUME_CONSOLE:
-            Logger::printf("RESUME_CONSOLE: idk address");
-            // ConsoleState::Resume(socket);
+            ConsoleState::Set(ConsoleState::RUNNING);
             break;
         case Command::IS_CONSOLE_PAUSED:
-            Logger::printf("IS_CONSOLE_PAUSED: idk address");
-            // ConsoleState::GetState(socket);
+            ConsoleState::Get(&socket);
             break;
         case Command::SERVER_VERSION:
-            // Logger::printf("SERVER_VERSION: not implemted");
-            // Info::ServerVersion(socket);
             socket.send(GECKO_SERVER_VERSION);
             break;
         case Command::GET_OS_VERSION:
-            Logger::printf("GET_OS_VERSION: not implemted");
+            // not tcpGecko compliant but simpler and contains more information
+            OS::Version(&socket);
             break;
         case Command::SET_DATA_BREAKPOINT:
             skip(&socket, sizeof(uint32_t) + sizeof(bool)*2);
@@ -175,7 +165,6 @@ void runGecko(const Socket socket)
             Logger::printf("IOSU_HAX_READ_FILE: not implemted");
             break;
         case Command::GET_VERSION_HASH:
-            // Info::VersionHash(socket);
             socket.send(GECKO_VERSION_HASH);
             break;
         case Command::PERSIST_ASSEMBLY:

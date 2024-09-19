@@ -4,6 +4,7 @@
 #include "../kernel/kernel_utils.h"
 
 #include <cstdint>
+// #include <cstdarg>
 
 // I got NO FUCKING CLUE WHAT THIS IS!??!?!?!?!
 static const uint8_t codeHandler[] = {
@@ -2760,17 +2761,23 @@ static_assert(sizeof(codeHandler) == 0x2AE8);
 
 void CodeHandler::Install()
 {
-    uint32_t physAddress = kernel::physical(CODE_HANDLER_INSTALL_ADDRESS);
+    // Logger::printf("virtual: 0x%08x, physical 0x%08x", CODE_HANDLER_INSTALL_ADDRESS, physAddress);
 
-    Logger::printf("virtual: 0x%08x, physical 0x%08x", CODE_HANDLER_INSTALL_ADDRESS, physAddress);
-
-    kernel::memcpy(reinterpret_cast<void*>(physAddress),
-        kernel::physical(codeHandler), sizeof(codeHandler));
+    // kernel::memcpy(reinterpret_cast<void*>(CODE_HANDLER_INSTALL_ADDRESS),
+    //     kernel::physical(codeHandler), sizeof(codeHandler));
 
     // CodeHandlerFunction();
+
+    // Logger::print("Code Handler Install");
 }
 
 void CodeHandler::CodeHandlerFunction()
 {
-    reinterpret_cast<void(*)()>(CODE_HANDLER_INSTALL_ADDRESS)();
+    // reinterpret_cast<void(*)()>(CODE_HANDLER_INSTALL_ADDRESS)();
+    // Logger::print("Code Handler Function");
+}
+
+void CodeHandler::test(uint32_t code, ...)
+{
+    Logger::print("CodeHandler - Function");
 }

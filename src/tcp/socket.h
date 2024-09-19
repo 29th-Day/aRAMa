@@ -3,8 +3,6 @@
 #include <cstdint>
 #include <unistd.h>
 
-#include "../arama/logger.h"
-
 class Socket
 {
     const int fd_;
@@ -52,7 +50,6 @@ public:
         while (bytes > 0)
         {
             n = read(fd_, buffer, bytes);
-            Logger::printf("recv - n: %u", n);
             if (n <= 0) return false;
             bytes -= n;
             buffer += n;

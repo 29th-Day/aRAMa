@@ -4,17 +4,37 @@
 #include <coreinit/memorymap.h>
 #include <coreinit/cache.h>
 
+#include "../arama/logger.h"
+
 #include <algorithm>
 
 #define addrof(x) reinterpret_cast<uint32_t>(x)
 
+/**
+ * Copies a specified number of bytes from the source memory location to the destination memory location via kernel. Similar to `std::memcpy`.
+ *
+ * @attention Function requires physical addresses!
+ *
+ * @param dst Pointer to the destination.
+ * @param src Pointer to the source.
+ * @param count Number of bytes to copy.
+ * @return Pointer to the destination memory location.
+ */
 void* kernel::memcpy(void* dst, const void* src, const uint32_t count)
 {
     KernelCopyData(addrof(dst), addrof(src), count);
-    DCFlushRange(dst, count);
+    // DCFlushRange(dst, count); // this is in TcpGecko, but idk if it's needed
     return dst;
 }
 
+/**
+ * Compares memory blocks. Similar to `std::memcmp`.
+ *
+ * @param lhs: Pointer to the first memory block.
+ * @param rhs: Pointer to the second memory block.
+ * @param count: Number of bytes to compare.
+ * @return `0` if all bytes are equal. `-1` if first differing byte of `lhs` is smaller than `rhs` else `1`.
+ */
 int kernel::memcmp(const void* lhs, const void* rhs, uint32_t count)
 {
 
@@ -38,16 +58,34 @@ int kernel::memcmp(const void* lhs, const void* rhs, uint32_t count)
     return 0;
 }
 
+/**
+ * @brief Convert local / effective pointer to physical pointer.
+ *
+ * @param pointer Effective pointer.
+ * @return Physical pointer.
+ */
 void* kernel::physical(const void* pointer)
 {
     return reinterpret_cast<void*>(OSEffectiveToPhysical(reinterpret_cast<uint32_t>(pointer)));
 }
 
+/**
+ * @brief Convert local / effective memory address to physical memory address.
+ *
+ * @param address Effective address.
+ * @return Physical address.
+ */
 uint32_t kernel::physical(const uint32_t address)
 {
     return OSEffectiveToPhysical(address);
 }
 
+/**
+ * @brief Execute raw assembly???? NOT TESTED!
+ *
+ * @param assembly Raw assembly block.
+ * @param size Size of block.
+ */
 void kernel::execute(uint8_t* assembly, uint32_t size)
 {
     // write assembly to executable region

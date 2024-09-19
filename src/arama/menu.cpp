@@ -2,7 +2,6 @@
 #include "config.h"
 #include "arama.h"
 #include "logger.h"
-#include "version.h"
 #include "../tcp/server.h"
 
 #include <wups/config/WUPSConfigItemBoolean.h>

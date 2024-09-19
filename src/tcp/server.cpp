@@ -6,11 +6,13 @@
 #include <arpa/inet.h>
 #include <thread>
 #include <memory>
+#include <atomic>
 
 #define close_fd(fd) {if (fd > 0) { close(fd); fd = -1; }}
 
 static int server = -1;
 static int client = -1;
+static std::atomic_bool running = false;
 
 static std::unique_ptr<std::thread> tcpThread = nullptr;
 
@@ -27,9 +29,11 @@ void run_server(ClientReadyCallback callback)
     bind(server, (sockaddr*)&addr, sizeof(addr));
     listen(server, 5);
 
+    running = true;
+
     Logger::print("---- Opening TCP ----");
 
-    while (true)
+    while (running)
     {
         client = accept(server, nullptr, nullptr);
         if (client < 0) break;
@@ -72,12 +76,12 @@ void TCP::stop()
 
     Logger::printf("stopping tcp server");
 
+    running = false;
+
     if (client > 0)
-        Logger::printf("client shutdown: %i", shutdown(client, SHUT_RDWR));
-    // close_fd(client);
+        shutdown(client, SHUT_RDWR);
     if (server > 0)
-        Logger::printf("server shutdown: %i", shutdown(server, SHUT_RDWR));
-    // close_fd(server);
+        shutdown(server, SHUT_RDWR);
 
     tcpThread->join();
     tcpThread = nullptr;
