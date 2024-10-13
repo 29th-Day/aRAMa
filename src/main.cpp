@@ -19,7 +19,9 @@
 #include "arama/notify.h"
 #include "tcp/server.h"
 #include "gecko/gecko.h"
-#include "gecko/codeHandler.h"
+// #include "gecko/codeHandler.h"
+#include "geckU/geckU.h"
+#include "gecko/copyService.h"
 
 //Metadata
 WUPS_PLUGIN_NAME(ARAMA_PLUGIN_NAME);
@@ -44,6 +46,7 @@ INITIALIZE_PLUGIN()
 
 DEINITIALIZE_PLUGIN()
 {
+	CopyService::stop();
 	TCP::stop();
 }
 
@@ -55,10 +58,11 @@ ON_APPLICATION_START()
 
 	if (Config::options[Config::aRAMa] && isRunningAllowedTitleID())
 	{
+		Notifications::show("aRAMa starting...");
+
 		// Logger::print("Install code handler");
 		// CodeHandler::Install();
 
-		Notifications::show("Gecko starting...");
 		TCP::start(runGecko);
 	}
 }
@@ -67,6 +71,7 @@ ON_APPLICATION_REQUESTS_EXIT()
 {
 	Logger::print("application request end");
 
+	CopyService::stop();
 	TCP::stop();
 }
 

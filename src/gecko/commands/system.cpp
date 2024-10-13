@@ -26,6 +26,8 @@ void System::GetSymbol(const Socket* socket)
     uint8_t size, type;
     SymbolOffset offset;
 
+    // idk why this complicated & convoluted API is used...
+
     CHECK_ERROR(socket->recv(size));
     CHECK_ERROR(socket->recv(offset));
     size -= sizeof(SymbolOffset);
@@ -33,8 +35,8 @@ void System::GetSymbol(const Socket* socket)
     offset.Symbol -= offset.Module;
     offset.Module = 0;
 
-    std::vector<char> buffer;
-    buffer.reserve(size);
+    std::vector<char> buffer(size);
+    // buffer.reserve(size);
 
     CHECK_ERROR(socket->recv(buffer.data(), size));
     CHECK_ERROR(socket->recv(type));

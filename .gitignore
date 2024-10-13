@@ -1,12 +1,12 @@
 
 /build
-aRAMa.elf
-aRAMa.wps
 /.cache
 /.vscode
+
+aRAMa.elf
+aRAMa.wps
 compile_commands.json
 __pycache__
 *.backup
 *.npy
-*.py
 *.env

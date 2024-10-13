@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <unistd.h>
 
+// #include "../arama/logger.h"
+
 class Socket
 {
     const int fd_;
@@ -18,12 +20,15 @@ public:
 
     inline bool send(const void* buffer, uint32_t length) const
     {
+        // Logger::printf("send: %u / 0x%08x", length, length);
+
         uint32_t n = 0;
         void* buf = const_cast<void*>(buffer);
         while (length > 0)
         {
-            n = write(fd_, buf, length);
+            n = write(fd_, buf, length < 0x5000 ? length : 0x5000);
             if (n <= 0) return false;
+            // Logger::printf("%u written", n);
             length -= n;
             buf = reinterpret_cast<uint8_t*>(buf) + n;
         }

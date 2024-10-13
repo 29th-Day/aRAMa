@@ -83,7 +83,8 @@ void TCP::stop()
     if (server > 0)
         shutdown(server, SHUT_RDWR);
 
-    tcpThread->join();
+    if (tcpThread->joinable())
+        tcpThread->join();
     tcpThread = nullptr;
 
     Logger::print("TCP server stopped");

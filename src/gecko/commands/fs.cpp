@@ -39,10 +39,10 @@ void FS::ReadFile(const Socket* socket)
     uint32_t size = std::filesystem::file_size(path);
     socket->send(size);
 
-    char buffer[DATA_BUFFER_SIZE+1] = { 0 }; // ensure this is 0 terminated
+    char buffer[DATA_BUFFER_SIZE] = { 0 };
     while (file)
     {
-        file.read(buffer, sizeof(buffer)-1);
+        file.read(buffer, sizeof(buffer));
         std::streamsize n = file.gcount();
         socket->send(buffer, n);
     }

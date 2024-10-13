@@ -21,32 +21,32 @@
 void extractMemory(const Socket* socket, uint32_t start, uint32_t end, bool useKernel)
 {
     uint8_t buffer[DATA_BUFFER_SIZE] = { 0 };
-    void* bufferAddress = kernel::physical(buffer+1);
 
-    uint32_t length = 0;
-    while (start < end)
+    void* ptr = useKernel ? kernel::physical(buffer + 1) : buffer + 1;
+
+
+    for (uint32_t length = 0; start < end; start += length)
     {
-        length = std::min(end - start, DATA_BUFFER_SIZE);
+        length = std::min(end - start, DATA_BUFFER_SIZE - 1);
 
         if (useKernel)
         {
-            kernel::memcpy(bufferAddress,
-                reinterpret_cast<void*>(start), length);
+            kernel::memcpy(ptr, reinterpret_cast<void*>(start), length);
         }
         else
         {
-            memcpy(buffer+1, reinterpret_cast<void*>(start), length);
+            memcpy(ptr, reinterpret_cast<void*>(start), length);
         }
 
-        Logger::printf("length: %u / 0x%08x", length, length);
-        Logger::printf("0x%08x - 0x%08x", start, start + length);
-        Logger::printf("[1]: 0x%02x, [%u]: 0x%02x", buffer[1], length, buffer[length]);
+        // Logger::printf("length: %u / 0x%08x", length, length);
+        // Logger::printf("0x%08x - 0x%08x", start, start + length);
+        // Logger::printf("[1]: 0x%02x, [%u]: 0x%02x", buffer[1], length, buffer[length]);
 
+        // this is to align with the original API
+        // im not a big fan of this...
+        // depending on if just sending the data is more efficient than memcmp?
         buffer[0] = NON_ZEROES_FOUND;
-        // CHECK_ERROR(send(socket, buffer, length+1, 0) > 0);
         CHECK_ERROR(socket->send(buffer, length+1));
-
-        start += length;
     }
 }
 
@@ -68,7 +68,7 @@ void Memory::Read(const Socket* socket)
 template <typename T>
 void Memory::Write(const Socket* socket)
 {
-    uint8_t* ptr = nullptr;
+    T* ptr = nullptr;
     uint32_t value = 0;
 
     CHECK_ERROR(socket->recv(ptr));
@@ -109,6 +109,7 @@ void Memory::WriteKernel(const Socket* socket)
     Logger::printf("%s | address: 0x%08x <- 0x%08x", __FUNCTION__, address, value);
 
     kernel::memcpy(address, kernel::physical(&value), sizeof(value));
+    // DCFlushRange(address, sizeof(value));
 }
 
 void Memory::Search32(const Socket* socket)
@@ -152,15 +153,13 @@ void Memory::SearchEx(const Socket* socket)
     Logger::printf("aligned: 0x%08x", aligned);
     Logger::printf("patternLength: 0x%08x", patternLength);
 
-    // auto pattern = std::make_unique<uint8_t[]>(patternLength);
-    // auto pattern = std::vector<uint8_t>();
-    std::vector<uint8_t> pattern;
-    pattern.reserve(patternLength);
+    std::vector<uint8_t> pattern(patternLength);
+    // pattern.reserve(patternLength);
     // CHECK_ERROR(read(socket, pattern.get(), patternLength) == patternLength);
     CHECK_ERROR(socket->recv(pattern.data(), patternLength));
 
     std::vector<uint32_t> found;
-    // found.reserve(maxResults); // idk, maybe 
+    // found.reserve(maxResults); // idk, maybe
 
     uint32_t increment = aligned ? patternLength : 1;
     bool same = false;
@@ -189,16 +188,12 @@ void Memory::SearchEx(const Socket* socket)
         }
     }
 
-    Logger::printf("#found: %u", found.size());
-    for (const uint32_t& a : found)
-        Logger::printf("found: 0x%08x", a);
-
-    // uint32_t bytes = static_cast<uint32_t>(found.size()) * 4;
-    // send(socket, &bytes, sizeof(bytes), 0);
+    // Logger::printf("#found: %u", found.size());
+    // for (const uint32_t& a : found)
+    //     Logger::printf("found: 0x%08x", a);
 
     // insert number of elements (in bytes -> *4) in the beginning
     found.insert(found.begin(), found.size() * sizeof(uint32_t));
-    // send(socket, found.data(), found.size() * sizeof(uint32_t), 0);
     socket->send(found.data(), found.size() * sizeof(uint32_t));
 }
 

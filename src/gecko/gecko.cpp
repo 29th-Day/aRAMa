@@ -7,9 +7,12 @@
 #include "commands/os.h"
 
 #include "version.h"
-#include "codeHandler.h"
+#include "../geckU/geckU.h"
+#include "copyService.h"
 
-#include <avm/drc.h>
+// #include <avm/drc.h>
+
+#include <vector>
 
 #include "../arama/logger.h"
 
@@ -21,6 +24,9 @@ void skip(const Socket* socket, ssize_t bytes)
         CHECK_ERROR(socket->recv(tmp));
     }
 }
+
+constexpr uint32_t CONTAINER = 0x1506B501;
+constexpr uint32_t HEALTH = 0x1506B503;
 
 void runGecko(const Socket socket)
 {
@@ -50,9 +56,10 @@ void runGecko(const Socket socket)
             System::ValidateAddressRange(&socket);
             break;
         case Command::MEMORY_DISASSEMBLE:
+            Logger::printf("MEMORY_DISASSEMBLE: not implemted");
             // doesnt work i think
             // at least different than tcpGecko
-            Memory::Disassemble(&socket);
+            // Memory::Disassemble(&socket);
             break;
         case READ_MEMORY_COMPRESSED:
             skip(&socket, sizeof(uint32_t)*2);
@@ -66,6 +73,7 @@ void runGecko(const Socket socket)
             break;
         case Command::TAKE_SCREEN_SHOT:
             Logger::printf("TAKE_SCREEN_SHOT: not implemted");
+            // OS::TakeScreenshot(&socket);
             break;
         case Command::UPLOAD_MEMORY:
             Memory::Upload(&socket);
@@ -86,19 +94,21 @@ void runGecko(const Socket socket)
             FS::WriteFile(&socket);
             break;
         case Command::GET_CODE_HANDLER_ADDRESS:
+        {
             // Logger::printf("handler address: 0x%08x", CodeHandler::);
             socket.send(CODE_HANDLER_INSTALL_ADDRESS);
             break;
+        }
         case Command::READ_THREADS:
             // Logger::printf("READ_THREADS: not implemted");
             OS::GetThreads(&socket);
             break;
         case Command::ACCOUNT_IDENTIFIER:
-            // Logger::printf("ACCOUNT_IDENTIFIER: not implemted");
-            OS::Version(&socket);
+            OS::AccountIdentifier(&socket);
             break;
-        case Command::FOLLOW_POINTER:
+        case Command::FOLLOW_POINTER: // TODO
             // I dont quite get this but ...
+            // TEST: not tested
             System::FollowPointer(&socket);
             break;
         case Command::REMOTE_PROCEDURE_CALL:
@@ -113,9 +123,10 @@ void runGecko(const Socket socket)
         case Command::ADVANCED_MEMORY_SEARCH:
             Memory::SearchEx(&socket);
             break;
-        case Command::EXECUTE_ASSEMBLY:
+        case Command::EXECUTE_ASSEMBLY: // TODO
+            Logger::printf("EXECUTE_ASSEMBLY: not implemted");
             // not yet tested
-            System::ExecuteAssembly(&socket);
+            // System::ExecuteAssembly(&socket);
             break;
         case Command::PAUSE_CONSOLE:
             ConsoleState::Set(ConsoleState::PAUSED);
@@ -127,51 +138,52 @@ void runGecko(const Socket socket)
             ConsoleState::Get(&socket);
             break;
         case Command::SERVER_VERSION:
-            socket.send(GECKO_SERVER_VERSION);
+            socket.send(GECKO_SERVER_VERSION, sizeof(GECKO_SERVER_VERSION));
             break;
         case Command::GET_OS_VERSION:
-            // not tcpGecko compliant but simpler and contains more information
+            // not tcpGecko compliant but no magic and contains more information
             OS::Version(&socket);
             break;
-        case Command::SET_DATA_BREAKPOINT:
+        case Command::SET_DATA_BREAKPOINT: // TODO
             skip(&socket, sizeof(uint32_t) + sizeof(bool)*2);
             Logger::printf("SET_DATA_BREAKPOINT: not implemted");
             break;
-        case Command::SET_INSTRUCTION_BREAKPOINT:
+        case Command::SET_INSTRUCTION_BREAKPOINT: // TODO
             skip(&socket, sizeof(uint32_t));
             Logger::printf("SET_INSTRUCTION_BREAKPOINT: not implemted");
             break;
-        case Command::TOGGLE_BREAKPOINT:
+        case Command::TOGGLE_BREAKPOINT: // TODO
             skip(&socket, sizeof(uint32_t));
             Logger::printf("TOGGLE_BREAKPOINT: not implemted");
             break;
-        case Command::REMOVE_ALL_BREAKPOINTS:
+        case Command::REMOVE_ALL_BREAKPOINTS: // TODO
             Logger::printf("REMOVE_ALL_BREAKPOINTS: not implemted");
             break;
-        case Command::POKE_REGISTERS:
+        case Command::POKE_REGISTERS: // TODO
             skip(&socket, 4 * 32 + 8 * 32);
             Logger::printf("POKE_REGISTERS: not implemted");
             break;
-        case Command::GET_STACK_TRACE:
+        case Command::GET_STACK_TRACE: // TODO
             Logger::printf("GET_STACK_TRACE: not implemted");
             break;
-        case Command::GET_ENTRY_POINT_ADDRESS:
+        case Command::GET_ENTRY_POINT_ADDRESS: // TODO
             Logger::printf("GET_ENTRY_POINT_ADDRESS: not implemted");
             break;
         case Command::RUN_KERNEL_COPY_SERVICE:
-            Logger::printf("RUN_KERNEL_COPY_SERVICE: not implemted");
+            // Logger::printf("RUN_KERNEL_COPY_SERVICE: not implemted");
+            CopyService::start();
             break;
-        case Command::IOSU_HAX_READ_FILE:
+        case Command::IOSU_HAX_READ_FILE: // TODO
             Logger::printf("IOSU_HAX_READ_FILE: not implemted");
             break;
         case Command::GET_VERSION_HASH:
-            socket.send(GECKO_VERSION_HASH);
+            socket.send<uint32_t>(GECKO_VERSION_HASH);
             break;
-        case Command::PERSIST_ASSEMBLY:
+        case Command::PERSIST_ASSEMBLY: // TODO
             // skip "string"
             Logger::printf("PERSIST_ASSEMBLY: not implemted");
             break;
-        case Command::CLEAR_ASSEMBLY:
+        case Command::CLEAR_ASSEMBLY: // TODO
             Logger::printf("CLEAR_ASSEMBLY: not implemted");
             break;
         default:
