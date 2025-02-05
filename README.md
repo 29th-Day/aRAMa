@@ -1,3 +1,17 @@
+# DEVELOPMENT HAS STOPPED
+
+It currently **DOES NOT COMPILE** but there should be prior commits which should at least compile with little tinkering.
+
+Development efforts have shifted towards [rust-wiiu](https://github.com/rust-wiiu), a std-like Rust environment for Wii U Homebrew. Porting / implementing TCPGecko is still on my backlog (as of early 2025).
+
+This project will no longer be updated. The existing code will stay here as other people might be interested.
+
+<br>
+<br>
+<br>
+<br>
+
+
 # What is this?
 
 This is an unofficial TCPGecko rewrite and port for Aroma. It contains several improvements, including notifications, enabling and disabling specific features via the plugin config menu, and more.
